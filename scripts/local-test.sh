@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SDK_REPO="/Users/raillyhugo/Programming/railly/clerk-cli-auth"
-DEMO_REPO="/Users/raillyhugo/Programming/railly/clerk-cli-auth-demo"
-CLERK_CLI_REPO="${CLERK_CLI_REPO:-/Users/raillyhugo/Clerk/cli}"
-CLERK_CLI_CORE="$CLERK_CLI_REPO/packages/cli-core"
+SDK_REPO="$(cd "$(dirname "$0")/.." && pwd)"
+DEMO_REPO="${DEMO_REPO:-$SDK_REPO/../clerk-cli-auth-demo}"
+CLERK_CLI_REPO="${CLERK_CLI_REPO:-}"
+CLERK_CLI_CORE="${CLERK_CLI_REPO:+$CLERK_CLI_REPO/packages/cli-core}"
 ENV_FILE="$HOME/.clerk-cli-auth-demo.env"
 CHECK_ONLY=0
 
@@ -98,19 +98,29 @@ check_cmd bun "bun is installed"
 check_cmd node "node is installed"
 check_dir "$SDK_REPO" "SDK repo exists"
 check_dir "$DEMO_REPO" "demo consumer repo exists"
-check_dir "$CLERK_CLI_CORE" "Hunter Clerk CLI source exists"
+
+if command -v clerk >/dev/null 2>&1; then
+  ok "Clerk CLI is available (clerk on PATH)"
+elif [ -n "$CLERK_CLI_CORE" ] && [ -d "$CLERK_CLI_CORE" ]; then
+  ok "Clerk CLI is available (source at \$CLERK_CLI_REPO)"
+else
+  fail "Clerk CLI is available"
+  printf '       install clerk or set CLERK_CLI_REPO to a Clerk CLI source checkout\n'
+  FAILURES=$((FAILURES + 1))
+fi
+
 check_file "$SDK_REPO/dist/index.mjs" "SDK build exists: dist/index.mjs"
 
-if command -v bun >/dev/null 2>&1 && [ -d "$CLERK_CLI_CORE" ]; then
+if command -v clerk >/dev/null 2>&1 || { command -v bun >/dev/null 2>&1 && [ -n "$CLERK_CLI_CORE" ] && [ -d "$CLERK_CLI_CORE" ]; }; then
   if WHOAMI="$(clerk_cmd whoami 2>&1)"; then
-    ok "Hunter Clerk CLI is authenticated ($WHOAMI)"
+    ok "Clerk CLI is authenticated ($WHOAMI)"
   else
-    fail "Hunter Clerk CLI is authenticated"
+    fail "Clerk CLI is authenticated"
     printf '       %s\n' "$WHOAMI"
     FAILURES=$((FAILURES + 1))
   fi
 else
-  fail "Hunter Clerk CLI auth check could run"
+  fail "Clerk CLI auth check could run"
   FAILURES=$((FAILURES + 1))
 fi
 

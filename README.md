@@ -1,8 +1,8 @@
-# @clerk/cli-auth (local prototype)
+# clerk-cli-auth
 
-OAuth 2.0 Authorization Code + PKCE flow for CLIs that want to authenticate users via Clerk. Wraps the same pattern that `~/Clerk/cli` already uses internally, extracted into a reusable, runtime-agnostic TypeScript SDK.
+Reference implementation of the OAuth 2.0 Authorization Code + PKCE localhost-callback flow for adding [Clerk](https://clerk.com) authentication to command-line tools. Runtime-agnostic TypeScript, ~300 lines, tested.
 
-**Status:** local prototype. No publish, no remote push. See `05_Areas/clerk/cli-auth-sdk/00-proposal.md` in the vault for the full AIE-819 proposal.
+**Status:** example / prototype. Fork it, copy it, or file-link it — there is no published package yet.
 
 ## Usage
 
@@ -47,16 +47,12 @@ bun run build
 
 See `../clerk-cli-auth-demo/` for a clean consumer repo that links this package via `file:`. Run `./scripts/local-test.sh` once OAuth App is provisioned.
 
-## Provisioning an OAuth App (local only)
+## Provisioning an OAuth App against a Clerk dev instance
 
-Use Hunter's `clerk` CLI (PLAPI) against his Clerk dev instance. Never push real credentials to git.
+You need an OAuth Application registered with your Clerk dev instance. The `scripts/provision-oauth-app.sh` helper wraps the `clerk` CLI for that; see [`scripts/README.md`](./scripts/README.md). Never commit secrets to git.
 
 ```bash
-# from ~/Clerk/cli
-clerk platform oauth-apps create \
-	--name "cli-auth local test" \
-	--redirect-uri "http://127.0.0.1:*/callback" \
-	--pkce-required
+scripts/provision-oauth-app.sh --apply --instance <ins_...>
 ```
 
-(If wildcard-port redirect is not yet supported by clerk_go, register a fixed port and pass `callbackPort` in config.)
+The script prints `CLERK_OAUTH_CLIENT_ID` and `CLERK_ISSUER` exports that you feed to the SDK via `process.env`.

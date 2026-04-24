@@ -2,9 +2,9 @@
 set -euo pipefail
 
 DEFAULT_NAME="cli-auth-local-test"
-SDK_REPO="/Users/raillyhugo/Programming/railly/clerk-cli-auth"
-CLERK_CLI_REPO="${CLERK_CLI_REPO:-/Users/raillyhugo/Clerk/cli}"
-CLERK_CLI_CORE="$CLERK_CLI_REPO/packages/cli-core"
+SDK_REPO="$(cd "$(dirname "$0")/.." && pwd)"
+CLERK_CLI_REPO="${CLERK_CLI_REPO:-}"
+CLERK_CLI_CORE="${CLERK_CLI_REPO:+$CLERK_CLI_REPO/packages/cli-core}"
 
 NAME="$DEFAULT_NAME"
 CLIENT_ID=""
@@ -63,7 +63,11 @@ require_apply_prereqs() {
   command -v bun >/dev/null 2>&1 || die "bun is required"
   command -v node >/dev/null 2>&1 || die "node is required for JSON parsing"
   [ -d "$SDK_REPO" ] || die "SDK repo not found: $SDK_REPO"
-  [ -d "$CLERK_CLI_CORE" ] || die "Hunter's Clerk CLI repo not found: $CLERK_CLI_CORE"
+  if ! command -v clerk >/dev/null 2>&1; then
+    if [ -z "$CLERK_CLI_CORE" ] || [ ! -d "$CLERK_CLI_CORE" ]; then
+      die "clerk CLI not found on PATH; set CLERK_CLI_REPO to a Clerk CLI source checkout or install the clerk binary"
+    fi
+  fi
 }
 
 urlencode() {
@@ -74,7 +78,7 @@ resolve_target() {
   local apps_json
   if ! apps_json="$(clerk_cmd apps list --json 2>&1)"; then
     printf '%s\n' "$apps_json" >&2
-    die "failed to list Clerk applications; run Hunter's CLI auth flow first"
+    die "failed to list Clerk applications; run 'clerk auth login' first"
   fi
 
   APPS_JSON="$apps_json" node - "$INSTANCE" <<'NODE'
@@ -204,7 +208,7 @@ done
 
 if [ "$APPLY" -ne 1 ]; then
   printf 'DRY RUN: no Clerk backend mutation will be executed.\n\n'
-  printf 'Would verify Hunter CLI auth:\n  %s\n\n' "$(print_clerk_cmd whoami)"
+  printf 'Would verify Clerk CLI auth:\n  %s\n\n' "$(print_clerk_cmd whoami)"
   printf 'Would resolve target application/instance:\n  %s\n\n' "$(print_clerk_cmd apps list --json)"
   if [ -n "$INSTANCE" ]; then
     printf 'Requested instance: %s\n\n' "$INSTANCE"
@@ -226,7 +230,7 @@ require_apply_prereqs
 
 if ! WHOAMI="$(clerk_cmd whoami 2>&1)"; then
   printf '%s\n' "$WHOAMI" >&2
-  die "Hunter's Clerk CLI is not authenticated; run `bun run --cwd $CLERK_CLI_CORE src/cli.ts auth login`"
+  die "Clerk CLI is not authenticated; run 'clerk auth login'"
 fi
 
 TARGET_JSON="$(resolve_target)"

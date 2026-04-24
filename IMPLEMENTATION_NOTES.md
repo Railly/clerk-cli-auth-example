@@ -39,7 +39,7 @@
 
 ## Integration Testing
 
-Local integration testing is driven by the scripts in `scripts/`. Provisioning and teardown are dry-run by default; pass `--apply` only when intentionally mutating Hunter's Clerk dev instance.
+Local integration testing is driven by the scripts in `scripts/`. Provisioning and teardown are dry-run by default; pass `--apply` only when intentionally mutating a Clerk dev instance.
 
 Recipe:
 
@@ -51,7 +51,7 @@ Recipe:
 6. Run `scripts/local-test.sh` and follow the printed manual demo commands from the demo repo.
 7. Delete the test OAuth Application with `scripts/teardown-oauth-app.sh --client-id <client_id> --apply --instance <instance_id>`.
 
-Hunter's manual go/no-go checkpoints:
+Manual go/no-go checkpoints:
 
 - `bun run demo-cli login` opens the browser and completes consent.
 - Login prints `Logged in as <email>`.

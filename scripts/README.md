@@ -1,6 +1,6 @@
 # Local integration scripts
 
-These scripts are for Hunter's local `@clerk/cli-auth` prototype testing. They use Hunter's internal Clerk CLI from `/Users/raillyhugo/Clerk/cli` and the demo consumer at `/Users/raillyhugo/Programming/railly/clerk-cli-auth-demo`.
+Scripts for end-to-end testing the `@clerk/cli-auth` prototype against a real Clerk dev instance. They invoke the installed `clerk` CLI (or `bun run` against a Clerk CLI source checkout if a `CLERK_CLI_REPO` env var is set) and drive the demo consumer at `../clerk-cli-auth-demo`.
 
 All backend-mutating scripts default to dry-run. Pass `--apply` to create or delete anything in Clerk.
 
@@ -69,8 +69,8 @@ Checks:
 - `bun` and `node` are available.
 - SDK repo exists.
 - demo consumer repo exists.
-- Hunter's internal Clerk CLI source exists.
-- Hunter's Clerk CLI is authenticated.
+- Clerk CLI is available (either `clerk` binary on PATH or a source checkout via `CLERK_CLI_REPO`).
+- Clerk CLI is authenticated.
 - SDK is built at `dist/index.mjs`.
 - `~/.clerk-cli-auth-demo.env` exists with `CLERK_OAUTH_CLIENT_ID` and `CLERK_ISSUER`.
 
@@ -141,10 +141,10 @@ scripts/local-test.sh
 
 ### Keychain is locked
 
-Hunter's internal CLI stores OAuth credentials in the macOS keychain. Unlock the login keychain, then rerun:
+The Clerk CLI stores OAuth credentials in the macOS keychain. Unlock the login keychain, then rerun:
 
 ```bash
-bun run --cwd /Users/raillyhugo/Clerk/cli/packages/cli-core src/cli.ts --mode agent whoami
+clerk --mode agent whoami
 ```
 
 ### Redirect URI wildcard port is rejected
@@ -159,14 +159,14 @@ Then configure the demo to use the same fixed callback port if the prototype exp
 
 ### Clerk CLI is not authenticated
 
-Run Hunter's CLI login flow:
+Run the login flow:
 
 ```bash
-bun run --cwd /Users/raillyhugo/Clerk/cli/packages/cli-core src/cli.ts auth login
+clerk auth login
 ```
 
 Then verify:
 
 ```bash
-bun run --cwd /Users/raillyhugo/Clerk/cli/packages/cli-core src/cli.ts --mode agent whoami
+clerk --mode agent whoami
 ```
