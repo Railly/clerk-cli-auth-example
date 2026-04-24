@@ -1,19 +1,17 @@
-// PLACEHOLDER — Codex Agent A implements this.
-// Required exports:
-//   generateCodeVerifier(): string   // 43-char high-entropy base64url string (RFC 7636 §4.1)
-//   generateCodeChallenge(verifier: string): Promise<string>  // SHA-256 of verifier, base64url (S256)
-//   generateState(): string          // opaque CSRF token (32+ bytes, base64url)
-//
-// Implementation guidance: use `node:crypto` (randomBytes + createHash), no external deps.
+import { createHash, randomBytes } from "node:crypto";
 
-export function generateCodeVerifier(): string {
-	throw new Error("pkce.generateCodeVerifier not implemented");
+function base64Url(buffer: Buffer): string {
+	return buffer.toString("base64url");
 }
 
-export async function generateCodeChallenge(_verifier: string): Promise<string> {
-	throw new Error("pkce.generateCodeChallenge not implemented");
+export function generateCodeVerifier(): string {
+	return base64Url(randomBytes(32));
+}
+
+export async function generateCodeChallenge(verifier: string): Promise<string> {
+	return base64Url(createHash("sha256").update(verifier).digest());
 }
 
 export function generateState(): string {
-	throw new Error("pkce.generateState not implemented");
+	return base64Url(randomBytes(32));
 }
