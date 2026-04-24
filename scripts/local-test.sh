@@ -38,7 +38,11 @@ while [ "$#" -gt 0 ]; do
 done
 
 clerk_cmd() {
-  bun run --cwd "$CLERK_CLI_CORE" src/cli.ts --mode agent "$@"
+  if command -v clerk >/dev/null 2>&1; then
+    clerk --mode agent "$@"
+  else
+    bun run --cwd "$CLERK_CLI_CORE" src/cli.ts --mode agent "$@"
+  fi
 }
 
 ok() {

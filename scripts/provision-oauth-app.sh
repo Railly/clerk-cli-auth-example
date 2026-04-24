@@ -46,11 +46,19 @@ shell_join() {
 }
 
 clerk_cmd() {
-  bun run --cwd "$CLERK_CLI_CORE" src/cli.ts --mode agent "$@"
+  if command -v clerk >/dev/null 2>&1; then
+    clerk --mode agent "$@"
+  else
+    bun run --cwd "$CLERK_CLI_CORE" src/cli.ts --mode agent "$@"
+  fi
 }
 
 print_clerk_cmd() {
-  shell_join bun run --cwd "$CLERK_CLI_CORE" src/cli.ts --mode agent "$@"
+  if command -v clerk >/dev/null 2>&1; then
+    shell_join clerk --mode agent "$@"
+  else
+    shell_join bun run --cwd "$CLERK_CLI_CORE" src/cli.ts --mode agent "$@"
+  fi
 }
 
 require_apply_prereqs() {
